@@ -11,72 +11,117 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- HeyGen Embed -->
-    <script>
-      !function(window){
-        const host="https://labs.heygen.com",
-        url=host+"/guest/streaming-embed?share=eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19Qcm9mZXNzaW9uYWxMb29rX3B1YmxpYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzhkYzJjYWExNzJjZDRlNjc5NmIzN2U5ZjE2OTU0YjdlXzU1OTUwL3ByZXZpZXdfdGFyZ2V0LndlYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiYmRiMmViYzI0MTI1NDBlNzhlYmY5OTIxOTEzMTUxODgiLCJ1c2VybmFtZSI6ImJiY2IzN2RkZGY3NTQ3MDg5NGE3NTQ1MTdhODBiMmJhIn0%3D&inIFrame=1",
-        clientWidth=document.body.clientWidth,
-        wrapDiv=document.createElement("div");
-        wrapDiv.id="heygen-streaming-embed";
-        const container=document.createElement("div");
-        container.id="heygen-streaming-container";
-        const stylesheet=document.createElement("style");
-        stylesheet.innerHTML=`
-          #heygen-streaming-embed {
-            z-index: 9999;
-            position: fixed;
-            left: 40px;
-            bottom: 40px;
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            border: 2px solid #fff;
-            box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
-            transition: all linear 0.1s;
-            overflow: hidden;
+    <!-- HeyGen Embed with Auto-Fallback -->
+<script>
+  !function(window){
+    const host = "https://labs.heygen.com";
 
-            opacity: 0;
-            visibility: hidden;
-          }
-          #heygen-streaming-embed.show {
-            opacity: 1;
-            visibility: visible;
-          }
-          #heygen-streaming-embed.expand {
-            ${clientWidth<540?"height: 266px; width: 96%; left: 50%; transform: translateX(-50%);":"height: 366px; width: calc(366px * 16 / 9);"}
-            border: 0;
-            border-radius: 8px;
-          }
-          #heygen-streaming-container {
-            width: 100%;
-            height: 100%;
-          }
-          #heygen-streaming-container iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-          }
-        `;
-        const iframe=document.createElement("iframe");
-        iframe.allowFullscreen=!1;
-        iframe.title="Streaming Embed";
-        iframe.role="dialog";
-        iframe.allow="microphone";
-        iframe.src=url;
-        let visible=!1,initial=!1;
-        window.addEventListener("message",(e=>{
-          e.origin===host&&e.data&&e.data.type&&"streaming-embed"===e.data.type&&(
-            "init"===e.data.action?(initial=!0,wrapDiv.classList.toggle("show",initial)):
-            "show"===e.data.action?(visible=!0,wrapDiv.classList.toggle("expand",visible)):
-            "hide"===e.data.action&&(visible=!1,wrapDiv.classList.toggle("expand",visible))
-          )
-        }));
-        container.appendChild(iframe);
-        wrapDiv.appendChild(stylesheet);
-        wrapDiv.appendChild(container);
-        document.body.appendChild(wrapDiv)
-      }(globalThis);
-    </script>
+    // 🔑 List of HeyGen keys (share links)
+    const keys = [
+      "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19Qcm9mZXNzaW9uYWxMb29rX3B1YmxpYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzhkYzJjYWExNzJjZDRlNjc5NmIzN2U5ZjE2OTU0YjdlXzU1OTUwL3ByZXZpZXdfdGFyZ2V0LndlYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiYmRiMmViYzI0MTI1NDBlNzhlYmY5OTIxOTEzMTUxODgiLCJ1c2VybmFtZSI6ImJiY2IzN2RkZGY3NTQ3MDg5NGE3NTQ1MTdhODBiMmJhIn0%3D",
+      "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19DYXN1YWxMb29rX3B1Ymxp%0D%0AYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzRlNWUz%0D%0ANDU0ZWYyMDQ3ODVhMjcxNjM0NTY2ODQwZWRjXzU1OTQwL3ByZXZpZXdfdGFyZ2V0LndlYnAiLCJu%0D%0AZWVkUmVtb3ZlQmFja2dyb3VuZCI6ZmFsc2UsImtub3dsZWRnZUJhc2VJZCI6Ijc5NDE2ZDIzYTFl%0D%0AOTQ0NWJhM2QyNWU4NzQ1ZmQ4MjIyIiwidXNlcm5hbWUiOiIwNjNlZTM1MDk1ZjM0Mjc0Yjc4MGFk%0D%0ANjYxNWQzZjA3MSJ9",
+      "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19DYXN1YWxMb29rX3B1Ymxp%0D%0AYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzRlNWUz%0D%0ANDU0ZWYyMDQ3ODVhMjcxNjM0NTY2ODQwZWRjXzU1OTQwL3ByZXZpZXdfdGFyZ2V0LndlYnAiLCJu%0D%0AZWVkUmVtb3ZlQmFja2dyb3VuZCI6ZmFsc2UsImtub3dsZWRnZUJhc2VJZCI6ImQxZjkzNzk0OTM2%0D%0AYzQwNTk4ZmU5NzhkMzc3MTY2OGNhIiwidXNlcm5hbWUiOiI4MDFmMWMxNjg1MDY0YmM0OTU1YWE0%0D%0AOTVmMzI0N2U3MyJ9",
+      "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19DYXN1YWxMb29rX3B1Ymxp%0D%0AYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3YzLzRlNWUz%0D%0ANDU0ZWYyMDQ3ODVhMjcxNjM0NTY2ODQwZWRjXzU1OTQwL3ByZXZpZXdfdGFyZ2V0LndlYnAiLCJu%0D%0AZWVkUmVtb3ZlQmFja2dyb3VuZCI6ZmFsc2UsImtub3dsZWRnZUJhc2VJZCI6ImEwNGM4NjE5NmRi%0D%0AZDQ2NjBiOTVlMWE2MzM1YWVmMDQzIiwidXNlcm5hbWUiOiI3ZTc2NmM5N2NjMDE0YzNkYTdlMzZj%0D%0ANzZlYWJjZmQ3MSJ9",
+      "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19Qcm9mZXNzaW9uYWxMb29r%0D%0AX3B1YmxpYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3Yz%0D%0ALzhkYzJjYWExNzJjZDRlNjc5NmIzN2U5ZjE2OTU0YjdlXzU1OTUwL3ByZXZpZXdfdGFyZ2V0Lndl%0D%0AYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiZGVtby0x%0D%0AIiwidXNlcm5hbWUiOiJiYmNiMzdkZGRmNzU0NzA4OTRhNzU0NTE3YTgwYjJiYSJ9"  
+    ];
+
+
+    let currentIndex = 0;
+    let url = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
+
+    const clientWidth = document.body.clientWidth;
+    const wrapDiv = document.createElement("div");
+    wrapDiv.id = "heygen-streaming-embed";
+
+    const container = document.createElement("div");
+    container.id = "heygen-streaming-container";
+
+    const stylesheet = document.createElement("style");
+    stylesheet.innerHTML = `
+      #heygen-streaming-embed {
+        z-index: 9999;
+        position: fixed;
+        left: 40px;
+        bottom: 40px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0px 8px 24px 0px rgba(0, 0, 0, 0.12);
+        transition: all linear 0.1s;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+      }
+      #heygen-streaming-embed.show {
+        opacity: 1;
+        visibility: visible;
+      }
+      #heygen-streaming-embed.expand {
+        ${clientWidth < 540 
+          ? "height: 266px; width: 96%; left: 50%; transform: translateX(-50%);" 
+          : "height: 366px; width: calc(366px * 16 / 9);"}
+        border: 0;
+        border-radius: 8px;
+      }
+      #heygen-streaming-container {
+        width: 100%;
+        height: 100%;
+      }
+      #heygen-streaming-container iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    `;
+
+    let iframe = document.createElement("iframe");
+    iframe.allowFullscreen = false;
+    iframe.title = "Streaming Embed";
+    iframe.role = "dialog";
+    iframe.allow = "microphone";
+    iframe.src = url;
+
+    // ✅ Fallback logic: if iframe fails to load, switch key
+    iframe.onerror = function() {
+      console.warn("Key failed, switching to next...");
+      switchKey();
+    };
+
+    function switchKey() {
+      if (currentIndex < keys.length - 1) {
+        currentIndex++;
+        iframe.src = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
+      } else {
+        console.error("⚠️ All keys exhausted, no more backups available.");
+      }
+    }
+
+    let visible = false, initial = false;
+    window.addEventListener("message", (e => {
+      if (e.origin === host && e.data && e.data.type && e.data.type === "streaming-embed") {
+        if (e.data.action === "init") {
+          initial = true;
+          wrapDiv.classList.toggle("show", initial);
+        } else if (e.data.action === "show") {
+          visible = true;
+          wrapDiv.classList.toggle("expand", visible);
+        } else if (e.data.action === "hide") {
+          visible = false;
+          wrapDiv.classList.toggle("expand", visible);
+        } else if (e.data.action === "error") {
+          // 🔄 If HeyGen reports error, try switching key
+          switchKey();
+        }
+      }
+    }));
+
+    container.appendChild(iframe);
+    wrapDiv.appendChild(stylesheet);
+    wrapDiv.appendChild(container);
+    document.body.appendChild(wrapDiv);
+  }(globalThis);
+</script>
+
   </body>
 </html>
