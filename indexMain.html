@@ -11,7 +11,7 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- HeyGen Embed with Auto-Fallback + Watchdog -->
+    <!-- HeyGen Embed with Auto-Fallback -->
 <script>
   !function(window){
     const host = "https://labs.heygen.com";
@@ -24,8 +24,9 @@
       "eyJxdWFsaXR5IjoiaGlnaCIsImF2YXRhck5hbWUiOiJUaGFkZGV1c19Qcm9mZXNzaW9uYWxMb29r%0D%0AX3B1YmxpYyIsInByZXZpZXdJbWciOiJodHRwczovL2ZpbGVzMi5oZXlnZW4uYWkvYXZhdGFyL3Yz%0D%0ALzhkYzJjYWExNzJjZDRlNjc5NmIzN2U5ZjE2OTU0YjdlXzU1OTUwL3ByZXZpZXdfdGFyZ2V0Lndl%0D%0AYnAiLCJuZWVkUmVtb3ZlQmFja2dyb3VuZCI6dHJ1ZSwia25vd2xlZGdlQmFzZUlkIjoiZGVtby0x%0D%0AIiwidXNlcm5hbWUiOiJiYmNiMzdkZGRmNzU0NzA4OTRhNzU0NTE3YTgwYjJiYSJ9"  
     ];
 
+
     let currentIndex = 0;
-    const url = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
+    let url = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
 
     const clientWidth = document.body.clientWidth;
     const wrapDiv = document.createElement("div");
@@ -80,57 +81,27 @@
     iframe.allow = "microphone";
     iframe.src = url;
 
-    let loadTimer;
-
-    // ⏱️ Watchdog to detect non-responsive iframe
-    function startWatchdog() {
-      clearTimeout(loadTimer);
-      loadTimer = setTimeout(() => {
-        console.warn("⏳ HeyGen not responding, switching to next key...");
-        switchKey();
-      }, 8000); // wait 8 seconds max for init
-    }
-
-    function switchKey() {
-      if (currentIndex < keys.length - 1) {
-        currentIndex++;
-        console.log("🔄 Switching to backup key:", currentIndex);
-
-        const newIframe = document.createElement("iframe");
-        newIframe.allowFullscreen = false;
-        newIframe.title = "Streaming Embed";
-        newIframe.role = "dialog";
-        newIframe.allow = "microphone";
-        newIframe.src = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
-
-        newIframe.onerror = () => {
-          console.warn("❌ Load error, trying next...");
-          switchKey();
-        };
-
-        container.replaceChild(newIframe, iframe);
-        iframe = newIframe;
-
-        startWatchdog(); // restart watchdog for new iframe
-      } else {
-        console.error("⚠️ All keys exhausted, no more backups available.");
-      }
-    }
-
-    // ✅ Fallback if iframe load error triggers directly
+    // ✅ Fallback logic: if iframe fails to load, switch key
     iframe.onerror = function() {
       console.warn("Key failed, switching to next...");
       switchKey();
     };
 
+    function switchKey() {
+      if (currentIndex < keys.length - 1) {
+        currentIndex++;
+        iframe.src = host + "/guest/streaming-embed?share=" + keys[currentIndex] + "&inIFrame=1";
+      } else {
+        console.error("⚠️ All keys exhausted, no more backups available.");
+      }
+    }
+
     let visible = false, initial = false;
     window.addEventListener("message", (e => {
       if (e.origin === host && e.data && e.data.type && e.data.type === "streaming-embed") {
         if (e.data.action === "init") {
-          clearTimeout(loadTimer); // stop watchdog
           initial = true;
           wrapDiv.classList.toggle("show", initial);
-          console.log("✅ HeyGen initialized successfully");
         } else if (e.data.action === "show") {
           visible = true;
           wrapDiv.classList.toggle("expand", visible);
@@ -148,9 +119,6 @@
     wrapDiv.appendChild(stylesheet);
     wrapDiv.appendChild(container);
     document.body.appendChild(wrapDiv);
-
-    // 🔥 Start watchdog for the very first iframe
-    startWatchdog();
   }(globalThis);
 </script>
 
